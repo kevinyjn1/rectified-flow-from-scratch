@@ -50,5 +50,5 @@ def make_flow_batch(x1, seed):
 def flow_matching_loss(v_pred, v_target):
     """Score a predicted velocity against the straight-path target."""
     # TODO: Implement `flow_matching_loss` to score predicted velocities against a target.
-    return torch.mean((v_pred-v_target)**2)
+    return torch.nn.functional.mse_loss(v_pred,v_target)
 
