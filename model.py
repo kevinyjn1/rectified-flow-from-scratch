@@ -103,3 +103,17 @@ def velocity_mlp_forward(x, t, params, time_embed_dim):
     v=h@params["W3"]+params["b3"]
     return v
 
+# Step 10 - make_mixture_dataset
+def make_mixture_dataset(centers, n_per_component, std, seed):
+    """Build a fixed-seed 2-D Gaussian mixture from component centers."""
+    # TODO: Build a fixed-seed 2-D Gaussian mixture from component centers...
+    torch.manual_seed(seed)
+    groups=[]
+    # centers #shape n_components,2
+    # n_per_component #int
+    # std #float
+    for k in range(centers.shape[0]): #how many clouds
+        Z=torch.randn(n_per_component,2) #how many dots
+        groups.append(centers[k]+Z*std)
+    return torch.cat(groups,dim=0).to(torch.float32)
+
