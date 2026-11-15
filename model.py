@@ -89,3 +89,17 @@ def init_velocity_mlp(in_dim, hidden_dim, time_embed_dim, seed):
 
     return {"W1":W1, "W2":W2,"W3":W3,"b1":b1,"b2":b2,"b3":b3}
 
+# Step 9 - velocity_mlp_forward
+def velocity_mlp_forward(x, t, params, time_embed_dim):
+    """Return a velocity of the same shape as x from states, times, and MLP params."""
+    # TODO: Embed t with the sinusoidal embedding, concatenate it with x...
+    
+    t = torch.as_tensor(t,dtype=x.dtype,device=x.device)
+    t=t.reshape(-1,1).expand(x.shape[0],1)
+    emb = sinusoidal_time_embedding(t,time_embed_dim)
+    h=torch.cat([x,emb],dim=1)
+    h=torch.relu(h@params["W1"]+params["b1"])
+    h=torch.relu(h@params["W2"]+params["b2"])
+    v=h@params["W3"]+params["b3"]
+    return v
+
