@@ -117,3 +117,31 @@ def make_mixture_dataset(centers, n_per_component, std, seed):
         groups.append(centers[k]+Z*std)
     return torch.cat(groups,dim=0).to(torch.float32)
 
+# Step 11 - flow_train_step
+def flow_train_step(params, data, batch_size, lr, time_embed_dim, seed):
+    """Draw a minibatch of data, compute the flow-matching loss through the velocity MLP, and take one manual SGD update."""
+    # TODO: Implement flow_train_step to perform one in-place manual SGD update on a velocity MLP.
+    torch.manual_seed(seed)
+    # pick some rows
+    n=data.shape[0]
+    idx=torch.randint(0,n,(batch_size,))
+    minibatch=data[idx]
+
+    # make examples guess score
+    xt, v_target, t = make_flow_batch(minibatch,seed+1)
+    v_pred = velocity_mlp_forward(xt,t,params,time_embed_dim)
+    loss = torch.nn.functional.mse_loss(v_target,v_pred)
+
+    # find slope
+    for p in params.values():
+        if p.grad is not None:
+            p.grad.zero_() #compute new slope
+    loss.backward()
+
+    # nudge each weight
+    with torch.no_grad():
+        for p in params.values():
+            p -= lr * p.grad
+
+    return params,loss.item()
+
