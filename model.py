@@ -76,15 +76,15 @@ def init_velocity_mlp(in_dim, hidden_dim, time_embed_dim, seed):
     #layer 1
     n_in=in_dim + time_embed_dim
     n_out=hidden_dim
-    W1= torch.randn(n_in,n_out)*torch.sqrt(torch.tensor(2/(n_in+n_out))).requires_grad_()
+    W1= (torch.randn(n_in,n_out)*torch.sqrt(torch.tensor(2/(n_in+n_out)))).requires_grad_()
     b1=torch.zeros(n_out, requires_grad=True)
 
     #layer 2
-    W2=torch.randn(hidden_dim,hidden_dim)*torch.sqrt(torch.tensor(2/(hidden_dim+hidden_dim))).requires_grad_()
+    W2=(torch.randn(hidden_dim,hidden_dim)*torch.sqrt(torch.tensor(2/(hidden_dim+hidden_dim)))).requires_grad_()
     b2=torch.zeros(hidden_dim, requires_grad=True)
 
     #layer 3
-    W3=torch.randn(hidden_dim,in_dim)*torch.sqrt(torch.tensor(2/(hidden_dim+in_dim))).requires_grad_()
+    W3=(torch.randn(hidden_dim,in_dim)*torch.sqrt(torch.tensor(2/(hidden_dim+in_dim)))).requires_grad_()
     b3=torch.zeros(in_dim, requires_grad=True)
 
     return {"W1":W1, "W2":W2,"W3":W3,"b1":b1,"b2":b2,"b3":b3}
@@ -144,4 +144,14 @@ def flow_train_step(params, data, batch_size, lr, time_embed_dim, seed):
             p -= lr * p.grad
 
     return params,loss.item()
+
+# Step 12 - train_rectified_flow
+def train_rectified_flow(params, data, n_steps, batch_size, lr, time_embed_dim, seed):
+    """Repeat flow_train_step for n_steps and return updated params plus the loss history."""
+    # TODO: train_rectified_flow runs a short training loop for the velocity MLP...
+    losses=[]
+    for i in range(n_steps):
+        params, loss=flow_train_step(params, data, batch_size, lr, time_embed_dim, seed+i)
+        losses.append(loss)
+    return params, losses
 
